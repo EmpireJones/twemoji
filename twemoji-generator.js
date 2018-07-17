@@ -114,7 +114,7 @@ Queue([
                   }
                 });
               }
-              
+
             },
             // and per each folder
             Object.keys(assets)
@@ -729,39 +729,39 @@ function createTwemoji(re) {
           // require any action/replacement
           // http://unicode.org/Public/UNIDATA/StandardizedVariants.html
           if (variant !== '\uFE0E') {
-            src = options.callback(
+            return options.callback(
               grabTheRightIcon(icon, variant),
               options,
               variant
             );
-            if (src) {
-              // recycle the match string replacing the emoji
-              // with its image counter part
-              ret = '<img '.concat(
-                'class="', options.className, '" ',
-                'draggable="false" ',
-                // needs to preserve user original intent
-                // when variants should be copied and pasted too
-                'alt="',
-                match,
-                '"',
-                ' src="',
-                src,
-                '"'
-              );
-              attrib = options.attributes(icon, variant);
-              for (attrname in attrib) { 
-                if (
-                  attrib.hasOwnProperty(attrname) &&
-                  // don't allow any handlers to be set + don't allow overrides
-                  attrname.indexOf('on') !== 0 &&
-                  ret.indexOf(' ' + attrname + '=') === -1
-                ) {
-                  ret = ret.concat(' ', attrname, '="', escapeHTML(attrib[attrname]), '"');
-                }
-              }
-              ret = ret.concat('>');
-            }
+            // if (src) {
+            //   recycle the match string replacing the emoji
+            //   with its image counter part
+            //   ret = '<img '.concat(
+            //     'class="', options.className, '" ',
+            //     'draggable="false" ',
+            //     // needs to preserve user original intent
+            //     // when variants should be copied and pasted too
+            //     'alt="',
+            //     match,
+            //     '"',
+            //     ' src="',
+            //     src,
+            //     '"'
+            //   );
+            //   attrib = options.attributes(icon, variant);
+            //   for (attrname in attrib) {
+            //     if (
+            //       attrib.hasOwnProperty(attrname) &&
+            //       // don't allow any handlers to be set + don't allow overrides
+            //       attrname.indexOf('on') !== 0 &&
+            //       ret.indexOf(' ' + attrname + '=') === -1
+            //     ) {
+            //       ret = ret.concat(' ', attrname, '="', escapeHTML(attrib[attrname]), '"');
+            //     }
+            //   }
+            //   ret = ret.concat('>');
+            // }
           }
           return ret;
         });
@@ -835,7 +835,14 @@ function createTwemoji(re) {
       }
 
       function replace(text, callback) {
-        return String(text).replace(re, callback);
+        //return String(text).replace(re, callback);
+        var result = [];
+        let match;
+        while ((match = re.exec(String(text)))) {
+          result.push(match[0]);
+          console.log(`Matched sequence ${match[0]} — code points: ${[...match[0]].length}`);
+        }
+        return result;
       }
 
       function test(text) {

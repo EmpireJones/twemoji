@@ -431,36 +431,37 @@ var twemoji = (function (
       var
         ret = rawText,
         iconId = grabTheRightIcon(rawText),
-        src = options.callback(iconId, options),
+        callbackResult = options.callback(iconId, options),
         attrib,
         attrname;
-      if (iconId && src) {
+      if (iconId && callbackResult) {
         // recycle the match string replacing the emoji
         // with its image counter part
-        ret = '<img '.concat(
-          'class="', options.className, '" ',
-          'draggable="false" ',
-          // needs to preserve user original intent
-          // when variants should be copied and pasted too
-          'alt="',
-          rawText,
-          '"',
-          ' src="',
-          src,
-          '"'
-        );
-        attrib = options.attributes(rawText, iconId);
-        for (attrname in attrib) {
-          if (
-            attrib.hasOwnProperty(attrname) &&
-            // don't allow any handlers to be set + don't allow overrides
-            attrname.indexOf('on') !== 0 &&
-            ret.indexOf(' ' + attrname + '=') === -1
-          ) {
-            ret = ret.concat(' ', attrname, '="', escapeHTML(attrib[attrname]), '"');
-          }
-        }
-        ret = ret.concat('/>');
+        return callbackResult
+        // ret = '<img '.concat(
+        //   'class="', options.className, '" ',
+        //   'draggable="false" ',
+        //   // needs to preserve user original intent
+        //   // when variants should be copied and pasted too
+        //   'alt="',
+        //   rawText,
+        //   '"',
+        //   ' src="',
+        //   src,
+        //   '"'
+        // );
+        // attrib = options.attributes(rawText, iconId);
+        // for (attrname in attrib) {
+        //   if (
+        //     attrib.hasOwnProperty(attrname) &&
+        //     // don't allow any handlers to be set + don't allow overrides
+        //     attrname.indexOf('on') !== 0 &&
+        //     ret.indexOf(' ' + attrname + '=') === -1
+        //   ) {
+        //     ret = ret.concat(' ', attrname, '="', escapeHTML(attrib[attrname]), '"');
+        //   }
+        // }
+        // ret = ret.concat('/>');
       }
       return ret;
     });
@@ -534,7 +535,35 @@ var twemoji = (function (
   }
 
   function replace(text, callback) {
-    return String(text).replace(re, callback);
+    //return String(text).replace(re, callback);
+    re.lastIndex = 0; // reset regex
+    var result = [];
+    var matches;
+    var nextCharIndex = 0;
+    while ( matches = re.exec(String(text))) {
+      var match = matches[0];
+      var matchIndex = matches.index;
+
+      // first add any non-emoji text which ocurred before the emoji
+      if ( matchIndex !== nextCharIndex) {
+        result.push(text.slice(nextCharIndex, matchIndex));
+      }
+
+      // update index
+      nextCharIndex = matchIndex + match.length;
+
+      // now add the emoji
+      result.push(callback(match));
+    }
+
+    // add any remaining text
+    if (nextCharIndex != text.length) {
+      result.push(text.slice(nextCharIndex));
+    }
+
+    re.lastIndex = 0; // reset regex
+
+    return result;
   }
 
   function test(text) {

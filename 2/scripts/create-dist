@@ -32,7 +32,7 @@ fs.writeFileSync(
   '\n  return twemoji;\n});'
 );
 
-require('child_process').spawn(
+var child = require('child_process').spawn(
   'node',
   [
     path.join(__dirname, '../../', 'node_modules/uglify-js/bin/uglifyjs'),
@@ -41,12 +41,25 @@ require('child_process').spawn(
     '-o',
     file('twemoji.tmp.js')
   ]
-).on('close', function () {
+)
+child.stdout.on('data', function(data) {
+    console.log('stdout: ' + data);
+    //Here is where the output goes
+});
+child.stderr.on('data', function(data) {
+    console.log('stderr: ' + data);
+    //Here is where the error output goes
+});
+child.on('close', function () {
   fs.writeFileSync(
     file('twemoji.min.js'),
     '/*! Copyright Twitter Inc. and other contributors. Licensed under MIT */\n' +
     fs.readFileSync(file('twemoji.tmp.js'))
   );
-  fs.unlink(file('twemoji.tmp.js'));
+  fs.unlink(file('twemoji.tmp.js'), function(err){
+    if (err) {
+      console.log('unlink error: ' + err);
+    }
+  });
   // gzip -c twemoji.min.js | wc -c
 });
